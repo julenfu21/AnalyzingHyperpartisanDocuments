@@ -6,6 +6,8 @@ from zipfile import ZipFile
 from lxml import etree
 from tqdm import tqdm
 
+from src.constants import txt_constants
+
 
 class DataFileTypesNames(Enum):
     ARTICLES = "articles-validation-bypublisher-20181122"
@@ -118,12 +120,12 @@ class HyperpartisanDocumentsLoader:
     def __add_article_to_txt_file__(txt_file_path, article) -> None:
         with open(txt_file_path, encoding='utf-8', mode='a') as txt_file:
             # Add article metadata
-            txt_file.write(f"ID: {article.get('id')} ----> Title: {article.get('title')} \n \n")
+            txt_file.write(f"ID: {article.get('id')} ----> Title: {article.get('title')}\n\n")
 
             # Add article text
             for paragraph in article:
                 text = paragraph.xpath('string()')
                 if text:
-                    txt_file.write(f"{text} \n \n")
+                    txt_file.write(f"{text}\n\n")
 
-            txt_file.write('\n')
+            txt_file.write(f"{txt_constants.ARTICLE_END}\n")

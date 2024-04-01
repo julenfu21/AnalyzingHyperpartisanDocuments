@@ -1,0 +1,1 @@
+ARTICLE_END = '-----END ARTICLE-----'
