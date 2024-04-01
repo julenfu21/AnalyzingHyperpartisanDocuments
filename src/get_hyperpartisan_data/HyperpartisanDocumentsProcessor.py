@@ -21,21 +21,27 @@ class HyperpartisanDocumentsProcessor:
 
     def get_clean_documents(self) -> tuple[list[list[str]], list[list[str]]]:
         hyperpartisan_documents_list = self.__get_clean_document_list_from_txt_file__(
-            txt_file_path=self.hyperpartisan_documents_path
+            txt_file_path=self.hyperpartisan_documents_path,
+            document_type='Hyperpartisan'
         )
         non_hyperpartisan_documents_list = self.__get_clean_document_list_from_txt_file__(
-            txt_file_path=self.non_hyperpartisan_documents_path
+            txt_file_path=self.non_hyperpartisan_documents_path,
+            document_type='Non-Hyperpartisan'
         )
 
         return hyperpartisan_documents_list, non_hyperpartisan_documents_list
 
-    def __get_clean_document_list_from_txt_file__(self, txt_file_path: str | Path) -> list[list[str]]:
+    def __get_clean_document_list_from_txt_file__(
+            self,
+            txt_file_path: str | Path,
+            document_type: str
+    ) -> list[list[str]]:
         documents = []
         current_document_line_index = 0
         current_document_content = []
 
         with open(txt_file_path, encoding='utf-8', mode='r') as txt_file:
-            # for line in tqdm(txt_file, desc="Getting clean documents..."):
+            progress_bar = tqdm(desc=f'Getting clean documents ({document_type}) ...', total=75000)
             for line in txt_file:
                 # Remove '\n' tokens
                 line = line.strip()
@@ -49,6 +55,7 @@ class HyperpartisanDocumentsProcessor:
                         current_document = " ".join(current_document_content)
                         current_clean_document = self.__clean_document__(document=current_document)
                         documents.append(current_clean_document)
+                        progress_bar.update(1)
 
                         # Reset line values
                         current_document_line_index = 0
