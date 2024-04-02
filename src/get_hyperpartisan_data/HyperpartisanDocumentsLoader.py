@@ -1,17 +1,12 @@
 import os
-from enum import Enum
 from pathlib import Path
 from zipfile import ZipFile
 
 from lxml import etree
 from tqdm import tqdm
 
-from src.constants import txt_constants
-
-
-class DataFileTypesNames(Enum):
-    ARTICLES = "articles-validation-bypublisher-20181122"
-    GROUND_TRUTH = "ground-truth-validation-bypublisher-20181122"
+from src.constant_values import constants
+from src.constant_values.enums import DataFileTypesNames
 
 
 class HyperpartisanDocumentsLoader:
@@ -128,4 +123,4 @@ class HyperpartisanDocumentsLoader:
                 if text:
                     txt_file.write(f"{text}\n\n")
 
-            txt_file.write(f"{txt_constants.ARTICLE_END}\n")
+            txt_file.write(f"{constants.ARTICLE_END}\n")
