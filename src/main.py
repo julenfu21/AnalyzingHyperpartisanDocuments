@@ -1,6 +1,6 @@
 from src.constant_values.enums import DocumentType
 from src.get_hyperpartisan_data.HyperpartisanDocumentsProcessor import HyperpartisanDocumentsProcessor
-
+from src.log_odd_ratios.LogOddRatiosCalculator import LogOddRatiosCalculator
 
 if __name__ == '__main__':
     # Load hyperpartisan documents into txt files
@@ -37,3 +37,11 @@ if __name__ == '__main__':
 
     print(f'Document sample after removing infrequent words ({DocumentType.NON_HYPERPARTISAN.value}):')
     print(f'{non_hyperpartisan_document_list[0]}\n')
+
+    # Calculate log-odd ratios
+    log_odd_ratios_calculator = LogOddRatiosCalculator(
+        hyperpartisan_documents_list=hyperpartisan_document_list,
+        non_hyperpartisan_documents_list=non_hyperpartisan_document_list
+    )
+
+    log_odd_ratios_calculator.calculate_log_odd_ratios()
