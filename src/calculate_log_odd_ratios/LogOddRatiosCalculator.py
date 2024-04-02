@@ -3,7 +3,7 @@ from collections import defaultdict
 from tqdm import tqdm
 
 from src.constant_values.enums import DocumentType
-from src.log_odd_ratios.DocumentGroup import DocumentGroup
+from src.calculate_log_odd_ratios.DocumentGroup import DocumentGroup
 
 
 class LogOddRatiosCalculator:
@@ -34,7 +34,7 @@ class LogOddRatiosCalculator:
             tokens_frequencies=self.non_hyperpartisan_tokens_frequencies
         )
 
-        # Calculate and store in 'self.log_odd_ratios'
+        # Calculate and store in 'self.calculate_log_odd_ratios'
         p_on_hyperpartisan = self.__get_p_on_document_list__(
             document_group=self.hyperpartisan_documents,
             tokens_frequencies=self.hyperpartisan_tokens_frequencies

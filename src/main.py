@@ -1,6 +1,6 @@
 from src.constant_values.enums import DocumentType
 from src.get_hyperpartisan_data.HyperpartisanDocumentsProcessor import HyperpartisanDocumentsProcessor
-from src.log_odd_ratios.LogOddRatiosCalculator import LogOddRatiosCalculator
+from src.calculate_log_odd_ratios.LogOddRatiosCalculator import LogOddRatiosCalculator
 
 if __name__ == '__main__':
     # Load hyperpartisan documents into txt files
