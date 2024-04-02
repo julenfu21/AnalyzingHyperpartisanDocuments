@@ -140,9 +140,15 @@ class LogOddRatiosCalculator:
 
         return r_on_full_corpus
 
+    def __get_r_on_token__(self, o_on_token_and_hyperpartisan: float, o_on_token_and_non_hyperpartisan) -> float:
+        return self.__log__(o_on_token_and_hyperpartisan) - self.__log__(o_on_token_and_non_hyperpartisan)
+
     @staticmethod
-    def __get_r_on_token__(o_on_token_and_hyperpartisan: float, o_on_token_and_non_hyperpartisan) -> float:
-        return math.log(o_on_token_and_hyperpartisan, 10) - math.log(o_on_token_and_non_hyperpartisan, 10)
+    def __log__(number: float) -> float:
+        try:
+            return math.log(number, 10)
+        except ValueError:
+            return float('-inf')
 
     @staticmethod
     def __get_n_highest_values_from_dictionary__(dictionary: dict, n: int = 50) -> dict:
