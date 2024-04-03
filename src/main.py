@@ -1,60 +1,57 @@
-from src.calculate_log_odd_ratios.LogOddRatiosCalculator import LogOddRatiosCalculator
-from src.calculate_log_odd_ratios.calculation_strategies.OnBigramsStrategy import OnBigramsStrategy
-from src.calculate_log_odd_ratios.calculation_strategies.OnTokensStrategy import OnTokensStrategy
+from src.calculate_log_odd_ratios.LogOddRatiosCalculator import LogOddRatiosCalculatorV2, TokenType
 from src.constant_values.enums import DocumentType
-from src.get_hyperpartisan_data.HyperpartisanDocumentsProcessor import HyperpartisanDocumentsProcessor
+from src.get_hyperpartisan_data.HyperpartisanDocumentsProcessor import HyperpartisanDocumentsProcessorV2
+
+
+# EXTRACT THIS KIND OF FUNCTION TO ANOTHER CLASS/FILE
+def print_document_list_stats(document_list: list[list[str]], document_type: DocumentType) -> None:
+    print(f"DOCUMENT LIST STATISTICS {document_type.value.upper()}:")
+    print(f'Number of documents: {len(document_list)}')
+    print(f'Document sample after performing preprocessing:')
+    print(f'{document_list[0]} \n\n')
+
 
 if __name__ == '__main__':
-    # Load hyperpartisan documents into txt files
-    # hyperpartisan_documents_loader = HyperpartisanDocumentsLoader()
-    # hyperpartisan_documents_loader.load_dataset()
+    # Load hyperpartisan documents into txt files (partimos de que están cargados)
 
     # Process hyperpartisan documents
-    hyperpartisan_documents_processor = HyperpartisanDocumentsProcessor(
-        # hyperpartisan_documents_path=Path('../data/txt/hyperpartisan_short.txt'),
-        # non_hyperpartisan_documents_path=Path('../data/txt/non-hyperpartisan_short.txt')
+    hyperpartisan_documents_processor = HyperpartisanDocumentsProcessorV2()
+
+    hyperpartisan_document_list = hyperpartisan_documents_processor.get_clean_documents(
+        document_type=DocumentType.HYPERPARTISAN
     )
-    hyperpartisan_document_list, non_hyperpartisan_document_list = (hyperpartisan_documents_processor.
-                                                                    get_clean_documents())
+    print_document_list_stats(
+        document_list=hyperpartisan_document_list,
+        document_type=DocumentType.HYPERPARTISAN
+    )
 
-    print(f'\n\tNumber of documents ({DocumentType.HYPERPARTISAN.value}): {len(hyperpartisan_document_list)}')
-    print(f'\tNumber of documents ({DocumentType.NON_HYPERPARTISAN.value}): {len(non_hyperpartisan_document_list)}')
-    print(f'\tTotal number of documents: {len(hyperpartisan_document_list) + len(non_hyperpartisan_document_list)}\n')
+    non_hyperpartisan_document_list = hyperpartisan_documents_processor.get_clean_documents(
+        document_type=DocumentType.NON_HYPERPARTISAN
+    )
+    print_document_list_stats(
+        document_list=non_hyperpartisan_document_list,
+        document_type=DocumentType.NON_HYPERPARTISAN
+    )
 
-    print(f'Document sample after performing preprocessing ({DocumentType.HYPERPARTISAN.value}):')
-    print(f'{hyperpartisan_document_list[0]}\n')
-
-    print(f'\nDocument sample after performing preprocessing ({DocumentType.NON_HYPERPARTISAN.value}):')
-    print(f'{non_hyperpartisan_document_list[0]}\n')
-
-    # Remove infrequent words (they appear <20 times) before extracting log-odd ratios
     hyperpartisan_document_list, non_hyperpartisan_document_list = (hyperpartisan_documents_processor.
         remove_infrequent_words(
-            documents=(hyperpartisan_document_list, non_hyperpartisan_document_list)
+            hyperpartisan_documents=hyperpartisan_document_list,
+            non_hyperpartisan_documents=non_hyperpartisan_document_list
         )
     )
 
-    print(f'Document sample after removing infrequent words ({DocumentType.HYPERPARTISAN.value}):')
-    print(f'{hyperpartisan_document_list[0]}\n')
-
-    print(f'Document sample after removing infrequent words ({DocumentType.NON_HYPERPARTISAN.value}):')
-    print(f'{non_hyperpartisan_document_list[0]}\n')
-
-    # log_odd_ratios_calculator = LogOddRatiosCalculator(
-    #     hyperpartisan_documents_list=hyperpartisan_document_list,
-    #     non_hyperpartisan_documents_list=non_hyperpartisan_document_list
-    # )
-
-    # Calculate log-odd ratios (ON TOKENS)
-    log_odd_ratios_calculator = LogOddRatiosCalculator(OnTokensStrategy(
-        hyperpartisan_documents_list=hyperpartisan_document_list,
-        non_hyperpartisan_documents_list=non_hyperpartisan_document_list
-    ))
-    # log_odd_ratios_calculator.calculate_log_odd_ratios()
-
-    # Calculate log-odd ratios (ON BIGRAMS)
-    log_odd_ratios_calculator.strategy = OnBigramsStrategy(
-        hyperpartisan_documents_list=hyperpartisan_document_list,
-        non_hyperpartisan_documents_list=non_hyperpartisan_document_list
+    # Calculate log-odd ratios
+    log_odd_ratios_calculator = LogOddRatiosCalculatorV2(
+        hyperpartisan_documents=hyperpartisan_document_list,
+        non_hyperpartisan_documents=non_hyperpartisan_document_list,
+        token_type=TokenType.BIGRAM
     )
+
     log_odd_ratios_calculator.calculate_log_odd_ratios()
+    hyperpartisan_most_relevant_words = (log_odd_ratios_calculator.
+                                         get_most_relevant_words(document_type=DocumentType.HYPERPARTISAN))
+    print(hyperpartisan_most_relevant_words)
+
+    non_hyperpartisan_most_relevant_words = (log_odd_ratios_calculator.
+                                             get_most_relevant_words(document_type=DocumentType.NON_HYPERPARTISAN))
+    print(non_hyperpartisan_most_relevant_words)
