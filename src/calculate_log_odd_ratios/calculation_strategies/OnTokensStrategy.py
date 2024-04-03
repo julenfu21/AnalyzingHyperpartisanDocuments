@@ -38,7 +38,7 @@ class OnTokensStrategy(CalculationStrategy):
             tokens_frequencies=self.non_hyperpartisan_tokens_frequencies
         )
 
-        # Calculate and store in 'self.calculate_log_odd_ratios'
+        # Calculate and store log-odd ratios
         p_on_hyperpartisan = self.__get_p_on_document_list__(
             document_group=self.hyperpartisan_documents,
             tokens_frequencies=self.hyperpartisan_tokens_frequencies
