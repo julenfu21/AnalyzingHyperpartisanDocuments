@@ -1,20 +1,25 @@
 import math
+import os
+import pickle
 from collections import defaultdict
 from itertools import pairwise
+from pathlib import Path
 
 from tqdm import tqdm
 
-from src.calculate_log_odd_ratios.DocumentGroup import DocumentGroup
+from src.log_odd_ratios.LogOddRatios import LogOddRatios
+from src.log_odd_ratios.DocumentGroup import DocumentGroup
 from src.constant_values.enums import DocumentType, TokenType
 
 
-class LogOddRatiosCalculatorV2:
+class LogOddRatiosCalculator:
 
     def __init__(
             self,
             hyperpartisan_documents: list[list[str]],
             non_hyperpartisan_documents: list[list[str]],
-            token_type: TokenType
+            token_type: TokenType,
+            pickle_data_folder_path=Path('../data/pickle')
     ) -> None:
         self.hyperpartisan_document_group = DocumentGroup(
             document_list=hyperpartisan_documents,
@@ -25,9 +30,12 @@ class LogOddRatiosCalculatorV2:
             document_type=DocumentType.NON_HYPERPARTISAN
         )
         self.token_type = token_type
+        self.pickle_data_folder_path = os.path.join(pickle_data_folder_path, 'log_odd_ratios')
+        if not os.path.exists(self.pickle_data_folder_path):
+            os.makedirs(self.pickle_data_folder_path)
 
         self.all_tokens = set()
-        self.log_odd_ratios: dict[str, float] = {}
+        self.log_odd_ratios = LogOddRatios(values={}, type=token_type)
 
         self.hyperpartisan_tokens_frequency = defaultdict(int)
         self.non_hyperpartisan_tokens_frequency = defaultdict(int)
@@ -67,12 +75,22 @@ class LogOddRatiosCalculatorV2:
     def calculate_log_odd_ratios(self) -> None:
         hyperpartisan_o_values, non_hyperpartisan_o_values = self.__calculate_o_values__()
         print("Calculating log-odd ratios ...")
-        self.log_odd_ratios = {token: self.__calculate_r_value_on_token__(
+        self.log_odd_ratios.values = {token: self.__calculate_r_value_on_token__(
             token=token,
             hyperpartisan_o_values=hyperpartisan_o_values,
             non_hyperpartisan_o_values=non_hyperpartisan_o_values
         ) for token in self.all_tokens}
-        print("Log-odd ratios calculated successfully. \n\n")
+        print("Log-odd ratios calculated successfully.")
+        print("Saving log-odd ratios into a pickle file ...")
+        self.__save_log_odd_ratios_to_pickle_file__()
+        print("Pickle file saved. \n\n")
+
+    def __save_log_odd_ratios_to_pickle_file__(self) -> None:
+        pickle_file_name = f'log-odd-ratios-{self.token_type.value}.pkl'
+        pickle_file_path = os.path.join(self.pickle_data_folder_path, pickle_file_name)
+
+        with open(pickle_file_path, 'wb') as pickle_file:
+            pickle.dump(self.log_odd_ratios, pickle_file)
 
     def __calculate_r_value_on_token__(
             self,
@@ -153,43 +171,3 @@ class LogOddRatiosCalculatorV2:
             reverse=True)
         )
         print(f'Highest values: {dict(list(sorted_values.items())[:20])} ... \n')
-
-    def get_most_relevant_words(
-            self,
-            document_type: DocumentType,
-            amount: int = 50,
-            infinite_values: bool = True
-    ) -> dict[str | tuple[str, str], float]:
-        if infinite_values:
-            print(f'Obtaining top {amount} most relevant {self.token_type.value}s for {document_type.value.upper()}:')
-        else:
-            print(f'Obtaining top {amount} most relevant {self.token_type.value}s for {document_type.value.upper()} '
-                  f'(without infinite values):')
-
-        match document_type:
-            case DocumentType.HYPERPARTISAN:
-                return self.__get_n_highest_values_from_dictionary__(
-                    dictionary=self.log_odd_ratios,
-                    n=amount,
-                    infinite_values=infinite_values
-                )
-            case DocumentType.NON_HYPERPARTISAN:
-                return self.__get_n_lowest_values_from_dictionary__(
-                    dictionary=self.log_odd_ratios,
-                    n=amount,
-                    infinite_values=infinite_values
-                )
-
-    @staticmethod
-    def __get_n_highest_values_from_dictionary__(dictionary: dict, n: int, infinite_values: bool) -> dict:
-        highest_values = dict(sorted(dictionary.items(), key=lambda item: item[1], reverse=True))
-        if not infinite_values:
-            highest_values = {key: value for key, value in highest_values.items() if value != float('inf')}
-        return dict(list(highest_values.items())[:n])
-
-    @staticmethod
-    def __get_n_lowest_values_from_dictionary__(dictionary: dict, n: int, infinite_values: bool) -> dict:
-        lowest_values = dict(sorted(dictionary.items(), key=lambda item: item[1], reverse=False))
-        if not infinite_values:
-            lowest_values = {key: value for key, value in lowest_values.items() if value != float('-inf')}
-        return dict(list(lowest_values.items())[:n])

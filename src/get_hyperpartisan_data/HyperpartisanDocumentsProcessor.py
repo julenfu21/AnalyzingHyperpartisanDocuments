@@ -10,7 +10,7 @@ from src.constant_values import constants
 from src.constant_values.enums import DocumentType
 
 
-class HyperpartisanDocumentsProcessorV2:
+class HyperpartisanDocumentsProcessor:
 
     def __init__(
             self,
@@ -18,11 +18,11 @@ class HyperpartisanDocumentsProcessorV2:
             pickle_data_folder_path=Path('../data/pickle')
     ) -> None:
         self.txt_data_folder_path = txt_data_folder_path
-        self.pickle_data_folder_path = pickle_data_folder_path
+        self.pickle_data_folder_path = os.path.join(pickle_data_folder_path, 'document_lists')
         self.unigrams_frequency = defaultdict(int)
 
-        if not os.path.exists(pickle_data_folder_path):
-            os.makedirs(pickle_data_folder_path)
+        if not os.path.exists(self.pickle_data_folder_path):
+            os.makedirs(self.pickle_data_folder_path)
 
     def get_clean_documents(self, document_type: DocumentType) -> list[list[str]]:
         if os.path.exists(f'{self.pickle_data_folder_path}/{document_type.value}.pkl'):
