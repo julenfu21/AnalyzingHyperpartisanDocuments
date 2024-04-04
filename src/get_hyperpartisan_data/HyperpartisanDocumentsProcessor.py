@@ -159,14 +159,6 @@ class HyperpartisanDocumentsProcessorV2:
             for token in document:
                 self.unigrams_frequency[token] += 1
 
-    def __print_unigrams_frequency_by_descending_order__(self) -> None:
-        sorted_token_frequencies = dict(sorted(
-            self.unigrams_frequency.items(),
-            key=lambda item: item[1],
-            reverse=True)
-        )
-        print(f'Most frequent tokens: {dict(list(sorted_token_frequencies.items())[:20])} ...')
-
     def __remove_infrequent_words_on_document_list__(
             self,
             document_list: list[list[str]],
