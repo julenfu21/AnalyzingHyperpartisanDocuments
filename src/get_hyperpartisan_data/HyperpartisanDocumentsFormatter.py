@@ -9,7 +9,7 @@ from src.constant_values import constants
 from src.constant_values.enums import DataFileTypesNames
 
 
-class HyperpartisanDocumentsLoader:
+class HyperpartisanDocumentsFormatter:
 
     def __init__(
             self,
@@ -21,7 +21,7 @@ class HyperpartisanDocumentsLoader:
         self.xml_data_folder_path = xml_data_folder_path
         self.txt_data_folder_path = txt_data_folder_path
 
-    def load_dataset(self):
+    def adapt_dataset_format(self):
         self.__extract_xml_files_from_zip_files__()
         self.__extract_data_from_xml_to_txt__()
 

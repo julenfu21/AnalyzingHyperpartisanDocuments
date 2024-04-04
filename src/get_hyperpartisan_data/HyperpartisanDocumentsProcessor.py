@@ -133,7 +133,7 @@ class HyperpartisanDocumentsProcessorV2:
             hyperpartisan_documents=hyperpartisan_documents,
             non_hyperpartisan_documents=non_hyperpartisan_documents
         )
-        print('Unigrams frequency calculated successfully.')
+        print('Unigrams frequency calculated successfully. \n')
 
         print('Removing infrequent words from the corpus ...')
         hyperpartisan_processed_sentence_list = self.__remove_infrequent_words_on_document_list__(
@@ -142,7 +142,7 @@ class HyperpartisanDocumentsProcessorV2:
         non_hyperpartisan_processed_sentence_list = self.__remove_infrequent_words_on_document_list__(
             document_list=non_hyperpartisan_documents, threshold_value=threshold_value
         )
-        print('Infrequent words removed successfully.')
+        print('Infrequent words removed successfully. \n')
 
         return hyperpartisan_processed_sentence_list, non_hyperpartisan_processed_sentence_list
 

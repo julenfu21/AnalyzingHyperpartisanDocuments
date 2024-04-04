@@ -1,10 +1,13 @@
 from dataclasses import dataclass, field
 from functools import cached_property
 
+from src.constant_values.enums import DocumentType
+
 
 @dataclass
 class DocumentGroup:
     document_list: list[list[str]] = field(default_factory=list)
+    document_type: DocumentType = field(default=DocumentType)
 
     @cached_property
     def word_count(self) -> int:

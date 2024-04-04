@@ -16,8 +16,14 @@ class LogOddRatiosCalculatorV2:
             non_hyperpartisan_documents: list[list[str]],
             token_type: TokenType
     ) -> None:
-        self.hyperpartisan_document_group = DocumentGroup(document_list=hyperpartisan_documents)
-        self.non_hyperpartisan_document_group = DocumentGroup(document_list=non_hyperpartisan_documents)
+        self.hyperpartisan_document_group = DocumentGroup(
+            document_list=hyperpartisan_documents,
+            document_type=DocumentType.HYPERPARTISAN
+        )
+        self.non_hyperpartisan_document_group = DocumentGroup(
+            document_list=non_hyperpartisan_documents,
+            document_type=DocumentType.NON_HYPERPARTISAN
+        )
         self.token_type = token_type
 
         self.all_tokens = set()
@@ -29,24 +35,28 @@ class LogOddRatiosCalculatorV2:
 
     def __set_tokens_frequency__(self) -> None:
         self.hyperpartisan_tokens_frequency = self.__calculate_tokens_frequency__(
-            document_list=self.hyperpartisan_document_group.document_list
+            document_group=self.hyperpartisan_document_group
         )
 
         self.non_hyperpartisan_tokens_frequency = self.__calculate_tokens_frequency__(
-            document_list=self.non_hyperpartisan_document_group.document_list
+            document_group=self.non_hyperpartisan_document_group
         )
 
-    def __calculate_tokens_frequency__(self, document_list: list[list[str]]) -> defaultdict[str | tuple[str, str], int]:
+        print()
+
+    def __calculate_tokens_frequency__(self, document_group: DocumentGroup) -> defaultdict[str | tuple[str, str], int]:
         tokens_frequency = defaultdict(int)
+        progress_bar_description = (f"Calculating {self.token_type.value}s frequency for "
+                                    f"{document_group.document_type.value.upper()} ...")
 
         match self.token_type:
             case TokenType.UNIGRAM:
-                for document in tqdm(document_list, desc=f"Calculating {self.token_type.value} frequency..."):
+                for document in tqdm(document_group.document_list, desc=progress_bar_description):
                     for unigram in document:
                         tokens_frequency[unigram] += 1
                         self.all_tokens.add(unigram)
             case TokenType.BIGRAM:
-                for document in tqdm(document_list, desc=f"Calculating {self.token_type.value} frequency..."):
+                for document in tqdm(document_group.document_list, desc=progress_bar_description):
                     for token_1, token_2 in pairwise(document):
                         bigram = (token_1, token_2)
                         tokens_frequency[bigram] += 1
@@ -55,16 +65,16 @@ class LogOddRatiosCalculatorV2:
         return tokens_frequency
 
     def calculate_log_odd_ratios(self) -> None:
-        hyperpartisan_o_values, non_hyperpartisan_o_values = self.calculate_o_values()
+        hyperpartisan_o_values, non_hyperpartisan_o_values = self.__calculate_o_values__()
         print("Calculating log-odd ratios ...")
-        self.log_odd_ratios = {token: self.calculate_r_value_on_token(
+        self.log_odd_ratios = {token: self.__calculate_r_value_on_token__(
             token=token,
             hyperpartisan_o_values=hyperpartisan_o_values,
             non_hyperpartisan_o_values=non_hyperpartisan_o_values
         ) for token in self.all_tokens}
-        print("log-odd ratios calculated successfully.")
+        print("Log-odd ratios calculated successfully. \n\n")
 
-    def calculate_r_value_on_token(
+    def __calculate_r_value_on_token__(
             self,
             token: str | tuple[str, str],
             hyperpartisan_o_values: dict[str, float],
@@ -79,7 +89,7 @@ class LogOddRatiosCalculatorV2:
         except ValueError:
             return float('-inf')
 
-    def calculate_o_values(self) -> tuple[defaultdict[str, float], defaultdict[str, float]]:
+    def __calculate_o_values__(self) -> tuple[defaultdict[str, float], defaultdict[str, float]]:
         hyperpartisan_o_values = self.__calculate_o_values_on_document_group__(
             tokens_frequency=self.hyperpartisan_tokens_frequency,
             document_group=self.hyperpartisan_document_group
@@ -94,6 +104,7 @@ class LogOddRatiosCalculatorV2:
         del self.non_hyperpartisan_document_group
         del self.non_hyperpartisan_tokens_frequency
 
+        print()
         return defaultdict(float, hyperpartisan_o_values), defaultdict(float, non_hyperpartisan_o_values)
 
     def __calculate_o_values_on_document_group__(
@@ -101,7 +112,7 @@ class LogOddRatiosCalculatorV2:
             tokens_frequency: defaultdict[str | tuple[str, str], int],
             document_group: DocumentGroup
     ) -> dict[str, float]:
-        print("Calculating o values ...")
+        print(f"Calculating o values for {document_group.document_type.value.upper()} ...")
         o_values = {token: self.__calculate_o_value_on_token__(
             token=token, tokens_frequency=tokens_frequency, document_group=document_group
         ) for token in tokens_frequency.keys()}
@@ -141,7 +152,7 @@ class LogOddRatiosCalculatorV2:
             key=lambda item: item[1],
             reverse=True)
         )
-        print(f'Highest values: {dict(list(sorted_values.items())[:20])} ...')
+        print(f'Highest values: {dict(list(sorted_values.items())[:20])} ... \n')
 
     def get_most_relevant_words(
             self,
@@ -149,7 +160,12 @@ class LogOddRatiosCalculatorV2:
             amount: int = 50,
             infinite_values: bool = True
     ) -> dict[str | tuple[str, str], float]:
-        print(f'Obtaining top {amount} most relevant {self.token_type.value}s for {document_type.value.upper()}:')
+        if infinite_values:
+            print(f'Obtaining top {amount} most relevant {self.token_type.value}s for {document_type.value.upper()}:')
+        else:
+            print(f'Obtaining top {amount} most relevant {self.token_type.value}s for {document_type.value.upper()} '
+                  f'(without infinite values):')
+
         match document_type:
             case DocumentType.HYPERPARTISAN:
                 return self.__get_n_highest_values_from_dictionary__(
