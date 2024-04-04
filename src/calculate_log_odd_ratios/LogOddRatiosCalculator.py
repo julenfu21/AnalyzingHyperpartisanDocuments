@@ -41,12 +41,12 @@ class LogOddRatiosCalculatorV2:
 
         match self.token_type:
             case TokenType.UNIGRAM:
-                for document in tqdm(document_list, desc="Calculating tokens frequency..."):
+                for document in tqdm(document_list, desc=f"Calculating {self.token_type.value} frequency..."):
                     for unigram in document:
                         tokens_frequency[unigram] += 1
                         self.all_tokens.add(unigram)
             case TokenType.BIGRAM:
-                for document in tqdm(document_list, desc="Calculating tokens frequency..."):
+                for document in tqdm(document_list, desc=f"Calculating {self.token_type.value} frequency..."):
                     for token_1, token_2 in pairwise(document):
                         bigram = (token_1, token_2)
                         tokens_frequency[bigram] += 1
@@ -147,20 +147,33 @@ class LogOddRatiosCalculatorV2:
             self,
             document_type: DocumentType,
             amount: int = 50,
+            infinite_values: bool = True
     ) -> dict[str | tuple[str, str], float]:
         print(f'Obtaining top {amount} most relevant {self.token_type.value}s for {document_type.value.upper()}:')
         match document_type:
             case DocumentType.HYPERPARTISAN:
-                return self.__get_n_highest_values_from_dictionary__(dictionary=self.log_odd_ratios, n=amount)
+                return self.__get_n_highest_values_from_dictionary__(
+                    dictionary=self.log_odd_ratios,
+                    n=amount,
+                    infinite_values=infinite_values
+                )
             case DocumentType.NON_HYPERPARTISAN:
-                return self.__get_n_lowest_values_from_dictionary__(dictionary=self.log_odd_ratios, n=amount)
+                return self.__get_n_lowest_values_from_dictionary__(
+                    dictionary=self.log_odd_ratios,
+                    n=amount,
+                    infinite_values=infinite_values
+                )
 
     @staticmethod
-    def __get_n_highest_values_from_dictionary__(dictionary: dict, n: int) -> dict:
+    def __get_n_highest_values_from_dictionary__(dictionary: dict, n: int, infinite_values: bool) -> dict:
         highest_values = dict(sorted(dictionary.items(), key=lambda item: item[1], reverse=True))
+        if not infinite_values:
+            highest_values = {key: value for key, value in highest_values.items() if value != float('inf')}
         return dict(list(highest_values.items())[:n])
 
     @staticmethod
-    def __get_n_lowest_values_from_dictionary__(dictionary: dict, n: int) -> dict:
+    def __get_n_lowest_values_from_dictionary__(dictionary: dict, n: int, infinite_values: bool) -> dict:
         lowest_values = dict(sorted(dictionary.items(), key=lambda item: item[1], reverse=False))
+        if not infinite_values:
+            lowest_values = {key: value for key, value in lowest_values.items() if value != float('-inf')}
         return dict(list(lowest_values.items())[:n])

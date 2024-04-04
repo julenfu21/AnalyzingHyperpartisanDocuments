@@ -51,7 +51,21 @@ if __name__ == '__main__':
     hyperpartisan_most_relevant_words = (log_odd_ratios_calculator.
                                          get_most_relevant_words(document_type=DocumentType.HYPERPARTISAN))
     print(hyperpartisan_most_relevant_words)
+    hyperpartisan_most_relevant_words_not_inf = (log_odd_ratios_calculator.
+        get_most_relevant_words(
+            document_type=DocumentType.HYPERPARTISAN,
+            infinite_values=False
+        )
+    )
+    print(hyperpartisan_most_relevant_words_not_inf)
 
     non_hyperpartisan_most_relevant_words = (log_odd_ratios_calculator.
                                              get_most_relevant_words(document_type=DocumentType.NON_HYPERPARTISAN))
     print(non_hyperpartisan_most_relevant_words)
+    non_hyperpartisan_most_relevant_words_not_inf = (log_odd_ratios_calculator.
+        get_most_relevant_words(
+            document_type=DocumentType.NON_HYPERPARTISAN,
+            infinite_values=False
+        )
+    )
+    print(non_hyperpartisan_most_relevant_words_not_inf)
