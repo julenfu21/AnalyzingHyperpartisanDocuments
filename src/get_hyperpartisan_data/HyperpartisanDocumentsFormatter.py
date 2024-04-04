@@ -26,6 +26,7 @@ class HyperpartisanDocumentsFormatter:
         self.__extract_data_from_xml_to_txt__()
 
     def __extract_xml_files_from_zip_files__(self) -> None:
+        print("Extracting XML data from zip files ...")
         data_files_names = [
             DataFileTypesNames.ARTICLES,
             DataFileTypesNames.GROUND_TRUTH
@@ -46,6 +47,8 @@ class HyperpartisanDocumentsFormatter:
                 with ZipFile(zip_file_path, 'r') as zip_file:
                     zip_file.extractall(path=self.xml_data_folder_path)
                 print(f'File {zip_file_name} extracted')
+
+        print()
 
     def __extract_data_from_xml_to_txt__(self) -> None:
         articles_file_name = f'{DataFileTypesNames.ARTICLES.value}.xml'
@@ -68,7 +71,7 @@ class HyperpartisanDocumentsFormatter:
 
         # Obtain and store the ground-truth value for each article
         ground_truth_dict = {}
-        for article in tqdm(articles, desc="Getting ground truth values..."):
+        for article in tqdm(articles, desc="Getting ground truth values ..."):
             article_id = article.get('id')
             hyperpartisan_str = article.get('hyperpartisan').capitalize()
             hyperpartisan_bool = eval(hyperpartisan_str)
@@ -97,7 +100,7 @@ class HyperpartisanDocumentsFormatter:
             os.makedirs(self.txt_data_folder_path)
 
         # Add articles into txt files
-        for article in tqdm(articles, desc="Extracting text from articles..."):
+        for article in tqdm(articles, desc="Extracting text from articles ..."):
             article_id = article.get('id')
             hyperpartisan: bool = ground_truths_dict[article_id]
 
@@ -105,6 +108,8 @@ class HyperpartisanDocumentsFormatter:
                 self.__add_article_to_txt_file__(txt_file_path=hyperpartisan_txt_file_path, article=article)
             else:
                 self.__add_article_to_txt_file__(txt_file_path=non_hyperpartisan_txt_file_path, article=article)
+
+        print()
 
     def __delete_previous_txt_files__(self) -> None:
         files_list = os.listdir(self.txt_data_folder_path)

@@ -1,14 +1,17 @@
 from src.calculate_log_odd_ratios.LogOddRatiosCalculator import LogOddRatiosCalculatorV2, TokenType
 from src.constant_values.enums import DocumentType
+from src.get_hyperpartisan_data.HyperpartisanDocumentsFormatter import HyperpartisanDocumentsFormatter
 from src.get_hyperpartisan_data.HyperpartisanDocumentsProcessor import HyperpartisanDocumentsProcessorV2
 from src.utils import console_output_formatter
 
+
 if __name__ == '__main__':
-    # Load hyperpartisan documents into txt files (partimos de que están cargados)
-
+    # Adapt hyperpartisan documents format into txt files
     console_output_formatter.print_section_header(section_header='Data formatting')
+    hyperpartisan_documents_formatter = HyperpartisanDocumentsFormatter()
+    hyperpartisan_documents_formatter.adapt_dataset_format()
 
-    # Process hyperpartisan documents
+    # Process hyperpartisan documents (if necessary) and load
     console_output_formatter.print_section_header(section_header='Data loading / preprocessing')
     hyperpartisan_documents_processor = HyperpartisanDocumentsProcessorV2()
 
@@ -29,10 +32,10 @@ if __name__ == '__main__':
     )
 
     hyperpartisan_document_list, non_hyperpartisan_document_list = (hyperpartisan_documents_processor.
-    remove_infrequent_words(
-        hyperpartisan_documents=hyperpartisan_document_list,
-        non_hyperpartisan_documents=non_hyperpartisan_document_list
-    )
+        remove_infrequent_words(
+            hyperpartisan_documents=hyperpartisan_document_list,
+            non_hyperpartisan_documents=non_hyperpartisan_document_list
+        )
     )
 
     # Calculate log-odd ratios
@@ -48,10 +51,10 @@ if __name__ == '__main__':
                                          get_most_relevant_words(document_type=DocumentType.HYPERPARTISAN))
     print(hyperpartisan_most_relevant_words)
     hyperpartisan_most_relevant_words_not_inf = (log_odd_ratios_calculator.
-    get_most_relevant_words(
-        document_type=DocumentType.HYPERPARTISAN,
-        infinite_values=False
-    )
+        get_most_relevant_words(
+            document_type=DocumentType.HYPERPARTISAN,
+            infinite_values=False
+        )
     )
     print(hyperpartisan_most_relevant_words_not_inf)
     print()
@@ -60,9 +63,9 @@ if __name__ == '__main__':
                                              get_most_relevant_words(document_type=DocumentType.NON_HYPERPARTISAN))
     print(non_hyperpartisan_most_relevant_words)
     non_hyperpartisan_most_relevant_words_not_inf = (log_odd_ratios_calculator.
-    get_most_relevant_words(
-        document_type=DocumentType.NON_HYPERPARTISAN,
-        infinite_values=False
-    )
+        get_most_relevant_words(
+            document_type=DocumentType.NON_HYPERPARTISAN,
+            infinite_values=False
+        )
     )
     print(non_hyperpartisan_most_relevant_words_not_inf)
