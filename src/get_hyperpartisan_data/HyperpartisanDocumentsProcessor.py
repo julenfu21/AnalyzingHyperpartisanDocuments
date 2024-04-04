@@ -14,7 +14,7 @@ class HyperpartisanDocumentsProcessorV2:
 
     def __init__(
             self,
-            txt_data_folder_path=Path('../data/txt/'),
+            txt_data_folder_path=Path('../data/txt'),
             pickle_data_folder_path=Path('../data/pickle')
     ) -> None:
         self.txt_data_folder_path = txt_data_folder_path
@@ -25,7 +25,7 @@ class HyperpartisanDocumentsProcessorV2:
             os.makedirs(pickle_data_folder_path)
 
     def get_clean_documents(self, document_type: DocumentType) -> list[list[str]]:
-        if os.path.exists(f'../data/pickle/{document_type.value}.pkl'):
+        if os.path.exists(f'{self.pickle_data_folder_path}/{document_type.value}.pkl'):
             print(f'The {document_type.value.upper()} document list already exists. Loading it from pickle file ...')
             clean_document_list = self.__get_clean_documents_from_pickle_file__(
                 document_type=document_type
@@ -75,7 +75,8 @@ class HyperpartisanDocumentsProcessorV2:
         txt_file_path = os.path.join(self.txt_data_folder_path, txt_file_name)
 
         with open(txt_file_path, encoding='utf-8', mode='r') as txt_file:
-            progress_bar = tqdm(desc=f'Getting clean documents from txt files ...', total=75000)
+            progress_bar_description = f'Getting clean documents from txt files for {document_type.value.upper()} ...'
+            progress_bar = tqdm(desc=progress_bar_description, total=75000)
             for line in txt_file:
                 # Remove '\n' tokens
                 line = line.strip()
