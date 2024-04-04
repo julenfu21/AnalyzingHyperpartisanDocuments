@@ -1,3 +1,5 @@
 lxml
 tqdm
 nltk
+jupyter
+gdown
