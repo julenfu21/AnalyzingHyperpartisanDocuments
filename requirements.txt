@@ -3,3 +3,5 @@ tqdm
 nltk
 jupyter
 gdown
+plotly
+pandas
